@@ -10,6 +10,7 @@ module.exports = function (env) {
         context: path.resolve(__dirname, '../src'),
         devServer: {
             static: {
+                directory: path.resolve(__dirname, '../src/public'),
                 publicPath: base,
                 watch: true,
             },

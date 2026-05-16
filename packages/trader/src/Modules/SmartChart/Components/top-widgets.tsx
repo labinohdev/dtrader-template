@@ -1,11 +1,9 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
-
 import { ChartTitle } from 'Modules/SmartChart';
 import { useTraderStore } from 'Stores/useTraderStores';
-
+import Digits from 'Modules/Contract/Components/Digits';
 import RecentTradeInfo from './recent-trade-info';
-
 type TTopWidgets = {
     InfoBox?: React.ReactNode;
     is_digits_widget_active?: boolean;
@@ -20,7 +18,6 @@ type TTopWidgets = {
     theme?: string;
     y_axis_width?: number;
 };
-
 const TopWidgets = ({
     InfoBox,
     is_mobile,
@@ -42,17 +39,16 @@ const TopWidgets = ({
             portalNodeId={is_mobile ? 'derivatives_trader' : undefined}
         />
     );
-
     const portal = ReactDOM.createPortal(
         <div className={`smartcharts-${theme}`}>
             <div className='top-widgets-portal'>
                 {ChartTitleLocal}
+                {is_digits_widget_active && <Digits />}
                 {!is_digits_widget_active && <RecentTradeInfo />}
             </div>
         </div>,
         document.getElementById('app_contents') as Element | DocumentFragment
     );
-
     return (
         <React.Fragment>
             {/* Hidden as we disable longcode temporarily */}
@@ -62,5 +58,4 @@ const TopWidgets = ({
         </React.Fragment>
     );
 };
-
 export default TopWidgets;

@@ -82,6 +82,7 @@
         "@deriv-com/quill-tokens": "2.0.4",
         "@deriv-com/quill-ui": "1.24.6",
         "@deriv-com/smartcharts-champion": "^1.9.3",
+        "@deriv-com/translations": "1.4.0",
         "@deriv-com/ui": "1.36.4",
         "@deriv-com/utils": "^0.0.42",
         "@deriv/api": "^1.0.0",
@@ -90,7 +91,6 @@
         "@deriv/quill-icons": "2.2.1",
         "@deriv/shared": "^1.0.0",
         "@deriv/stores": "^1.0.0",
-        "@deriv-com/translations": "1.4.0",
         "@deriv/utils": "^1.0.0",
         "@lottiefiles/dotlottie-react": "0.7.2",
         "@tanstack/react-query": "^4.36.1",
@@ -115,6 +115,7 @@
         "react-router": "^5.2.0",
         "react-router-dom": "^5.2.0",
         "react-swipeable": "^6.2.1",
-        "react-transition-group": "4.4.5"
+        "react-transition-group": "4.4.5",
+        "rimraf": "^6.1.3"
     }
 }

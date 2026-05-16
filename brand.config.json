@@ -1,70 +1,56 @@
 {
-    "brand_name": "Trading Platform",
-    "brand_logo": "brand/platform-logo.svg",
-    "brand_logo_dark": "brand/platform-logo.svg",
-    "brand_domain": "deriv.com",
-    "brand_hostname": {
-        "staging": "staging.dtrader-template.pages.dev",
-        "production": "dtrader-template.pages.dev"
-    },
-    "platform": {
-        "name": "Trading Platform",
-        "description": "A whole new trading experience on a powerful yet easy to use platform.",
-        "logo": "brand/platform-logo.svg",
-        "home_url": "https://home.deriv.com/dashboard",
-        "help_centre_url": "https://trade.deriv.com/help-centre"
-    },
-    "signup_url": {
-        "production": "https://home.deriv.com/dashboard/signup",
-        "staging": "https://staging-home.deriv.com/dashboard/signup"
-    },
-    "deposit_url": {
-        "staging": "https://staging.dtrader-template.pages.dev/transfer",
-        "production": "https://dtrader-template.pages.dev/transfer"
-    },
-    "auth": {
-        "staging": "https://staging-auth.deriv.com",
-        "production": "https://auth.deriv.com",
-        "oauth_scopes": ["trade", "account_manage"],
-        "oauth_redirect_uri_staging": "https://staging.dtrader-template.pages.dev",
-        "oauth_redirect_uri_production": "https://dtrader-template.pages.dev",
-        "oauth_app_id": ""
-    },
-    "derivws": {
-        "staging": "https://staging-api.derivws.com",
-        "production": "https://api.derivws.com"
-    },
-    "api_core": {
-        "staging": "staging-api-core.deriv.com",
-        "production": "api-core.deriv.com"
-    },
-    "api": {
-        "staging": "staging-api.deriv.com",
-        "production": "api.deriv.com"
-    },
-    "app_id": {
-        "staging": 16929,
-        "production": 16929
-    },
-    "colors": {
-        "primary": "#118e1c",
-        "secondary": "#85acb0",
-        "tertiary": "#ff6b35",
-        "success": "#4bb4b3",
-        "danger": "#ec3f3f",
-        "warning": "#ffad3a",
-        "info": "#2196f3",
-        "neutral": "#999999",
-        "black": "#181c25",
-        "white": "#ffffff"
-    },
-    "color_variants": {
-        "auto_generate": true,
-        "lighten_percentage": 10,
-        "darken_percentage": 10
-    },
-    "features": {
-        "dark_mode": true,
-        "language_switcher": false
-    }
+  "brand_name": "Tradekintra",
+  "brand_domain": "tradekintra.com",
+  "brand_logo": "brand-logo.svg",
+  "brand_hostname": {
+    "staging": "staging.tradekintra.com",
+    "production": "tradekintra.com"
+  },
+  "platform": {
+    "name": "Tradekintra Trader",
+    "description": "Tradekintra Trader - a modern derivatives trading platform with real-time charts, multipliers, and accumulators.",
+    "logo": "platform-logo.svg",
+    "home_url": "https://tradekintra.com",
+    "help_centre_url": "https://tradekintra.com/help"
+  },
+  "deposit_url": {
+    "staging": "https://staging.tradekintra.com/cashier/deposit",
+    "production": "https://tradekintra.com/cashier/deposit"
+  },
+  "auth": {
+    "staging": "https://staging-auth.deriv.com",
+    "production": "https://auth.deriv.com",
+    "oauth_scopes": ["trade", "account_manage"],
+    "oauth_redirect_uri_staging": "https://staging.tradekintra.com",
+    "oauth_redirect_uri_production": "https://tradekintra.com",
+    "oauth_app_id": "36300"
+  },
+  "app_id": {
+    "staging": 36300,
+    "production": 36300
+  },
+  "api": {
+    "staging": "wss://ws.derivws.com/websockets/v3",
+    "production": "wss://ws.derivws.com/websockets/v3"
+  },
+  "api_core": {
+    "staging": "wss://api.derivws.com/trading/v1",
+    "production": "wss://api.derivws.com/trading/v1"
+  },
+  "colors": {
+    "primary": "#0a1d56",
+    "secondary": "#00d09c",
+    "tertiary": "#6b7280",
+    "danger": "#ef4444",
+    "success": "#10b981",
+    "warning": "#f59e0b",
+    "info": "#3b82f6",
+    "neutral": "#9ca3af",
+    "black": "#111827",
+    "white": "#ffffff"
+  },
+  "features": {
+    "dark_mode": true,
+    "language_switcher": false
+  }
 }

@@ -106,8 +106,15 @@ const TradeChart = observer(() => {
     const { current_spot, current_spot_time } = accumulator_barriers_data || {};
 
     const topWidgets = React.useCallback(
-        () => <TopWidgets onSymbolChange={symbol => onChange({ target: { name: 'symbol', value: symbol } })} />,
-        [onChange]
+        () => (
+            <TopWidgets
+                onSymbolChange={symbol => onChange({ target: { name: 'symbol', value: symbol } })}
+                is_digits_widget_active={show_digits_stats}
+                is_mobile={isMobile}
+                theme={is_dark_mode_on ? 'dark' : 'light'}
+            />
+        ),
+        [onChange, show_digits_stats, isMobile, is_dark_mode_on]
     );
 
     // Use centralized SmartCharts adapter hook
