@@ -2,7 +2,7 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import { ChartTitle } from 'Modules/SmartChart';
 import { useTraderStore } from 'Stores/useTraderStores';
-import Digits from 'Modules/Contract/Components/Digits';
+// import Digits from 'Modules/Contract/Components/Digits';
 import RecentTradeInfo from './recent-trade-info';
 type TTopWidgets = {
     InfoBox?: React.ReactNode;
@@ -43,7 +43,7 @@ const TopWidgets = ({
         <div className={`smartcharts-${theme}`}>
             <div className='top-widgets-portal'>
                 {ChartTitleLocal}
-                {is_digits_widget_active && <Digits />}
+                {/* {is_digits_widget_active && <Digits />} */}
                 {!is_digits_widget_active && <RecentTradeInfo />}
             </div>
         </div>,

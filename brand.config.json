@@ -21,9 +21,9 @@
     "staging": "https://staging-auth.deriv.com",
     "production": "https://auth.deriv.com",
     "oauth_scopes": ["trade", "account_manage"],
-    "oauth_redirect_uri_staging": "https://staging.tradekintra.com",
-    "oauth_redirect_uri_production": "https://tradekintra.com",
-    "oauth_app_id": "36300"
+    "oauth_redirect_uri_staging": "https://staging.tradekintra.com/",
+    "oauth_redirect_uri_production": "https://tradekintra.com/",
+    "oauth_app_id": ""
   },
   "app_id": {
     "staging": 36300,
