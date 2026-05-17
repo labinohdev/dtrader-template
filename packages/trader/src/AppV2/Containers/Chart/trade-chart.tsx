@@ -13,6 +13,7 @@ import { observer, useStore } from '@deriv/stores';
 import { useDevice } from '@deriv-com/ui';
 
 import { filterByContractType } from 'Modules/Contract/Components/ContractAudit/positions-helper';
+import Digits from 'Modules/Contract/Components/Digits';
 import useActiveSymbols from 'AppV2/Hooks/useActiveSymbols';
 import useDefaultSymbol from 'AppV2/Hooks/useDefaultSymbol';
 import { SmartChart } from 'Modules/SmartChart';
@@ -85,6 +86,9 @@ const TradeChart = observer(() => {
         onChange,
         setTickData,
         prev_contract_type,
+        digit_stats,
+        tick_data,
+        last_digit,
     } = useTraderStore();
     const is_accumulator = isAccumulatorContract(contract_type);
     const timeoutsMapRef = React.useRef<Map<number, NodeJS.Timeout>>(new Map());
@@ -231,6 +235,30 @@ const TradeChart = observer(() => {
 
     return (
         <>
+            {show_digits_stats && (
+                <div
+                    className='trade-chart__digits-overlay'
+                    style={{
+                        display: 'flex',
+                        justifyContent: 'center',
+                        padding: '8px 16px',
+                        background: 'var(--color-surface-primary)',
+                    }}
+                >
+                    <Digits
+                        contract_info={{} as any}
+                        digits_info={{}}
+                        digits_array={digit_stats}
+                        is_trade_page={true}
+                        is_mobile={!!isMobile}
+                        onDigitChange={onChange}
+                        selected_digit={last_digit}
+                        trade_type={contract_type}
+                        tick={tick_data}
+                        underlying={symbol}
+                    />
+                </div>
+            )}
             <SmartChart
                 key={show_digits_stats ? symbol : 'trade-chart'}
                 drawingToolFloatingMenuPosition={
