@@ -79,11 +79,14 @@ const rules = (is_test_env = false) => [
         include: is_test_env ? /__tests__|src/ : /src/,
         use: js_loaders,
     },
-    {
-        test: /\.html$/,
-        exclude: /node_modules/,
-        use: html_loaders,
-    },
+    // [AI] html-loader rule disabled - HtmlWebpackPlugin handles index.html natively
+    // with templateParameters (lodash <%= %> interpolation). Was causing template
+    // variables to leak through unprocessed into deployed index.html.
+    // {
+    //     test: /\.html$/,
+    //     exclude: /node_modules/,
+    //     use: html_loaders,
+    // },
     {
         test: /\.(png|jpg|gif|woff|woff2|eot|ttf|otf|pdf|webp)$/,
         exclude: /node_modules/,

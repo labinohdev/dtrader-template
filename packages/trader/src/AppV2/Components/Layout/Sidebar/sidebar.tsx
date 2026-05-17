@@ -21,6 +21,7 @@ import {
 import {
     getBrandLogo,
     getBrandLogoDark,
+    getPlatformLogo,
     getBrandName,
     getHomeUrl,
     getHelpCentreUrl,
@@ -241,10 +242,10 @@ const Sidebar = observer(() => {
                 <div className='sidebar__header'>
                     {/* [AI] */}
                     <img
-                        src={`/${is_dark_mode_on ? getBrandLogoDark() : getBrandLogo()}`}
+                        src={`/${getPlatformLogo()}`}
                         alt={getBrandName()}
-                        width={32}
-                        height={32}
+                        width={48}
+                        height={48}
                         data-testid='dt_sidebar_brand_logo'
                     />
                     {/* [/AI] */}

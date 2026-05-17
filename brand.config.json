@@ -1,7 +1,8 @@
 {
   "brand_name": "Tradekintra",
   "brand_domain": "tradekintra.com",
-  "brand_logo": "brand-logo.svg",
+  "brand_logo": "brand/brand-logo.svg",
+  "brand_logo_dark": "brand/brand-logo-dark.svg",
   "brand_hostname": {
     "staging": "staging.tradekintra.com",
     "production": "tradekintra.com"
@@ -9,7 +10,7 @@
   "platform": {
     "name": "Tradekintra Trader",
     "description": "Tradekintra Trader - a modern derivatives trading platform with real-time charts, multipliers, and accumulators.",
-    "logo": "platform-logo.svg",
+    "logo": "brand/platform-logo.svg",
     "home_url": "https://tradekintra.com",
     "help_centre_url": "https://tradekintra.com/help"
   },
