@@ -31,7 +31,7 @@ const App = ({ root_store }) => {
     const language = preferred_language ?? getInitialLanguage();
     const { isBridgeAvailable, sendBridgeEvent } = useMobileBridge();
 
-    // Handle OAuth2 callback — the auth server redirects back to / with ?code=...&state=...
+    // Handle OAuth2 callback - the auth server redirects back to / with ?code=...&state=...
     // No separate /callback route needed; we handle it inline here on every mount.
     React.useEffect(() => {
         const params = new URLSearchParams(window.location.search);
@@ -45,13 +45,13 @@ const App = ({ root_store }) => {
             window.history.replaceState({}, '', url.toString());
         };
 
-        if (!code) return; // Normal load — not an OAuth callback
+        if (!code) return; // Normal load - not an OAuth callback
 
         // Validate CSRF token
         const stored_csrf = sessionStorage.getItem('oauth_csrf_token');
         if (!state || state !== stored_csrf) {
             // eslint-disable-next-line no-console
-            console.error('[OAuth] CSRF token mismatch — aborting token exchange');
+            console.error('[OAuth] CSRF token mismatch - aborting token exchange');
             clearTokens();
             cleanURL();
             return;
@@ -62,7 +62,7 @@ const App = ({ root_store }) => {
         exchangeCodeForToken(code)
             .then(() => {
                 // Token is now in sessionStorage. Reload to /  so initStore
-                // picks it up on fresh boot — avoids the race where onClientInit
+                // picks it up on fresh boot - avoids the race where onClientInit
                 // already ran before the token exchange completed.
                 window.location.replace('/');
             })
@@ -103,6 +103,34 @@ const App = ({ root_store }) => {
         loadSmartchartsStyles();
 
         // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, []);
+
+    // [AI] Auto-reconnect on return from background.
+    // Mobile browsers pause tabs in background; the WebSocket to Deriv dies and
+    // the existing error UI shows "Connection failed - please refresh". This effect
+    // detects when the tab becomes visible again after being hidden for >15 seconds
+    // and silently reloads to restore the connection.
+    React.useEffect(() => {
+        let hidden_at = null;
+        const RELOAD_THRESHOLD_MS = 15000; // 15 seconds
+
+        const handleVisibilityChange = () => {
+            if (document.visibilityState === 'hidden') {
+                hidden_at = Date.now();
+            } else if (document.visibilityState === 'visible') {
+                if (hidden_at && Date.now() - hidden_at > RELOAD_THRESHOLD_MS) {
+                    // eslint-disable-next-line no-console
+                    console.log('[Tradekintra] Page resumed after long hide - reloading to restore connection');
+                    window.location.reload();
+                }
+                hidden_at = null;
+            }
+        };
+
+        document.addEventListener('visibilitychange', handleVisibilityChange);
+        return () => {
+            document.removeEventListener('visibilitychange', handleVisibilityChange);
+        };
     }, []);
 
     const platform_passthrough = {
