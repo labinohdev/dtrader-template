@@ -244,18 +244,17 @@ export const getDisplayedContractTypes = (
         return [contract_type];
     }
 
-    // If trade_type_tab is set, filter by it
-    if (trade_type_tab) {
-        const filtered_types = available_types.filter(type => type === trade_type_tab);
-        // If filtering results in empty array but we have a valid trade_type_tab, return it
-        if (filtered_types.length === 0 && trade_type_tabs.some(tab => tab.contract_type === trade_type_tab)) {
-            return [trade_type_tab];
-        }
-        return filtered_types.sort((a, b) => getSortedIndex(a) - getSortedIndex(b));
-    }
+    // [AI] Disabled trade_type_tab filter so dual buttons render (Over+Under, Matches+Differs, Even+Odd).
+    // if (trade_type_tab) {
+    //     const filtered_types = available_types.filter(type => type === trade_type_tab);
+    //     if (filtered_types.length === 0 && trade_type_tabs.some(tab => tab.contract_type === trade_type_tab)) {
+    //         return [trade_type_tab];
+    //     }
+    //     return filtered_types.sort((a, b) => getSortedIndex(a) - getSortedIndex(b));
+    // }
+    // [/AI]
 
-    // If trade_type_tab is not set but there are tabs, return all available types
-    // This ensures buttons are displayed even when trade_type_tab hasn't been initialized yet
+    // Return all available types so both directional buttons render side-by-side.
     return available_types.sort((a, b) => getSortedIndex(a) - getSortedIndex(b));
 };
 

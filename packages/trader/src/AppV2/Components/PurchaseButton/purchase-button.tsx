@@ -1,7 +1,6 @@
 import React from 'react';
 import clsx from 'clsx';
 import { observer } from 'mobx-react-lite';
-
 import { StandaloneStopwatchRegularIcon } from '@deriv/quill-icons';
 import {
     getCardLabelsV2,
@@ -16,23 +15,18 @@ import { useStore } from '@deriv/stores';
 import { Button, useNotifications, useSnackbar } from '@deriv-com/quill-ui';
 import { useTranslations } from '@deriv-com/translations';
 import { useDevice } from '@deriv-com/ui';
-
 import useContractsFor from 'AppV2/Hooks/useContractsFor';
 import { checkIsServiceModalError } from 'AppV2/Utils/layout-utils';
 import { getTradeTypeTabsList } from 'AppV2/Utils/trade-params-utils';
 import { getDisplayedContractTypes } from 'AppV2/Utils/trade-types-utils';
 import { useTraderStore } from 'Stores/useTraderStores';
-
 import PurchaseButtonContent from './purchase-button-content';
-
 const BASIS_STAKE = 'stake';
 const BASIS_PAYOUT = 'payout';
 const BASIS_NAME = 'basis';
-
 type TPurchaseButtonProps = {
     onPurchaseSuccess?: () => void;
 };
-
 const PurchaseButton = observer(({ onPurchaseSuccess }: TPurchaseButtonProps = {}) => {
     const [loading_button_index, setLoadingButtonIndex] = React.useState<number | null>(null);
     const purchaseButtonRef = React.useRef(null);
@@ -70,14 +64,12 @@ const PurchaseButton = observer(({ onPurchaseSuccess }: TPurchaseButtonProps = {
         trade_type_tab,
         trade_types,
     } = useTraderStore();
-
     const active_accu_contract = is_accumulator
         ? all_positions.find(({ contract_info, type }) => {
               const contract_underlying = contract_info.underlying_symbol;
               return isAccumulatorContract(type) && contract_underlying === symbol && !contract_info.is_sold;
           })
         : undefined;
-
     const has_open_accu_contract = !!active_accu_contract;
     const basis_options = React.useMemo(
         () => (basis_list.length ? basis_list.map(item => item.value) : []),
@@ -147,35 +139,10 @@ const PurchaseButton = observer(({ onPurchaseSuccess }: TPurchaseButtonProps = {
     const last_shown_error_ref = React.useRef<string | null>(null);
 
     React.useEffect(() => {
-        // Only check errors for the currently displayed contract types (filtered by trade_type_tab)
-        // to avoid showing errors from non-displayed contract types (e.g., stale DIGITOVER error on Under tab)
-        if (proposal_info && contract_types.length > 0) {
-            let message = '';
-            const has_error = contract_types.some(type => {
-                const info = proposal_info[type];
-                if (info?.has_error && info?.message) {
-                    message = info.message || '';
-                    return true;
-                }
-                return false;
-            });
-
-            if (has_error && message && message !== last_shown_error_ref.current) {
-                last_shown_error_ref.current = message;
-                addSnackbar({
-                    message,
-                    status: 'fail',
-                    hasCloseButton: true,
-                    hasFixedHeight: false,
-                    style: {
-                        marginBottom: is_logged_in ? '48px' : '-8px',
-                        width: 'calc(100% - var(--core-spacing-800))',
-                    },
-                });
-            } else if (!has_error) {
-                last_shown_error_ref.current = null;
-            }
-        }
+        // [AI] Disabled proposal error snackbar — with dual buttons, errors for the
+        // inactive direction would constantly trigger (e.g., "Over 9" error fires when
+        // digit 9 is picked even though user intends to click Under). Per-button disable
+        // state already prevents invalid trades from being attempted.
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [proposal_info]);
 

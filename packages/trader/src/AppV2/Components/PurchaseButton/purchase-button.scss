@@ -1,24 +1,45 @@
 .purchase-button {
-    flex-direction: column-reverse;
+    flex-direction: row;
     padding-block: var(--core-spacing-400);
-    align-items: flex-end;
+    padding-inline: var(--core-spacing-800);
+    align-items: center;
+    justify-content: space-between;
     height: var(--core-size-2800);
-    gap: 0;
+    gap: var(--core-spacing-400);
+    border-radius: 0 !important; /* [AI] Rectangular corners */
+    color: #ffffff !important; /* [AI] White text */
+    font-weight: 700;
 
-    &:not(.quill-button:first-child .purchase-button):not(.purchase-button--loading) {
-        align-items: flex-start;
+    /* [AI] First button (purchase / Buy / Up / Over / Matches / Even / Rise / Higher / Touch) — neon green */
+    &.quill-button--purchase,
+    &.quill-button--color-purchase,
+    &[class*='purchase']:not([class*='sell']) {
+        background-color: #00ff08 !important;
+        background-image: none !important;
+        border-color: #00ff08 !important;
     }
+
+    /* [AI] Second button (sell / Fall / Down / Under / Differs / Odd / Lower / No Touch) — red */
+    &.quill-button--sell,
+    &.quill-button--color-sell,
+    &[class*='sell'] {
+        background-color: #ff0000 !important;
+        background-image: none !important;
+        border-color: #ff0000 !important;
+    }
+
     &--single {
         align-items: center;
         justify-content: center;
-
         .purchase-button__information__wrapper {
             justify-content: center;
             gap: var(--core-spacing-400);
         }
     }
+
     &--loading {
         align-items: center;
+        justify-content: center;
     }
 
     &__information {
@@ -27,6 +48,8 @@
             display: inline-flex;
             justify-content: space-between;
             align-items: center;
+            gap: var(--core-spacing-400);
+            color: #ffffff !important;
 
             &--reverse {
                 flex-direction: row-reverse;
@@ -36,29 +59,31 @@
                 min-height: var(--core-size-900);
             }
         }
-
         &__item {
-            color: var(--component-button-label-color-sell-primary);
+            color: #ffffff !important;
+            font-weight: 700;
         }
     }
 
     &__wrapper {
         display: flex;
+        flex-direction: column; /* [AI] Desktop default: stack buttons vertically */
         justify-content: space-between;
-        align-items: center;
+        align-items: stretch;
         gap: var(--core-spacing-400);
         width: 100%;
-        z-index: 2; // chart has z-index: 1, it should not push purchase buttons down
+        z-index: 2;
         bottom: var(--core-spacing-2800);
-        border-radius: 100px;
 
         @include mobile-screen {
+            flex-direction: row; /* [AI] Mobile: buttons side-by-side */
             padding: var(--core-spacing-400) 0;
         }
 
         &__un-auth {
             bottom: var(--core-spacing-50);
         }
+
         &.slide {
             &-enter {
                 transform: translateY(100%);
@@ -77,7 +102,7 @@
         }
 
         .quill-button {
-            border-radius: 28px;
+            border-radius: 0 !important; /* [AI] Rectangular */
         }
     }
 }
