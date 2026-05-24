@@ -4,8 +4,8 @@ import { observer } from 'mobx-react-lite';
 
 import { useDerivativesAccount, useMobileBridge } from '@deriv/api';
 import { Button, Skeleton, Text } from '@deriv/components';
-import { getBrandUrl, getSignupUrl } from '@deriv/shared';
 import { useStore } from '@deriv/stores';
+import { redirectToSignUp } from '@deriv/shared';
 import { useTranslations } from '@deriv-com/translations';
 
 import { LoginButton } from './login-button';
@@ -54,11 +54,20 @@ const AccountActionsComponent = observer(() => {
             // Show modal instead of redirecting directly
             ui.toggleTryRealModal(true);
         } else {
-            // Deposit button (for both account types or real-only accounts)
-            const brandUrl = getBrandUrl();
-            const lang_param = common.current_language ? `&lang=${common.current_language}` : '';
+            // [AI] Deposit opens Deriv's cashier in a new tab (Tradekintra has no
+            // built-in cashier yet). Per Amy at Deriv: cashier has no return_url
+            // parameter, so we open in a new tab and let the user close it when
+            // done. They land back on tradekintra.com automatically.
+            // Future work: build M-Pesa deposit on tradekintra.com for Kenyan
+            // market differentiation, plus subscribe to balance/transaction WS
+            // to show "Continue trading" prompt when funds arrive.
             sendBridgeEvent('trading:transfer', () => {
-                window.location.href = `${brandUrl}/transfer?from=dtrader&source=options&acc=options&curr=${currency}${lang_param}`;
+                const lang_param = common.current_language ? `&lang=${common.current_language}` : '';
+                window.open(
+                    `https://cashier.deriv.com/?source=tradekintra&curr=${currency}${lang_param}`,
+                    '_blank',
+                    'noopener,noreferrer'
+                );
             });
         }
     };
@@ -87,7 +96,6 @@ const AccountActionsComponent = observer(() => {
     );
 
     if (!is_logged_in) {
-        const signup_url = getSignupUrl();
         return (
             <div
                 id='dt_core_header_acc-info-container'
@@ -100,7 +108,7 @@ const AccountActionsComponent = observer(() => {
                     className='acc-info__button'
                     has_effect
                     text={localize('Sign up')}
-                    onClick={() => window.open(signup_url, '_blank', 'noopener,noreferrer')}
+                    onClick={() => redirectToSignUp()}
                     secondary
                 />
                 <LoginButton className='acc-info__button' />

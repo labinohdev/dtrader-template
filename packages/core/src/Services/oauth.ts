@@ -96,36 +96,104 @@ export const exchangeCodeForToken = async (
     return data;
 };
 // ---------------------------------------------------------------------------
+// [AI] Parent-domain cookie for cross-subdomain SSO
+// Both tradekintra.com and bot.tradekintra.com read/write this cookie so they
+// share auth state. Cookie is JS-readable (same XSS profile as sessionStorage)
+// but scoped to .tradekintra.com so all subdomains can access it.
+// Short 4-hour lifetime matches Deriv token expiry pattern.
+// ---------------------------------------------------------------------------
+const TK_COOKIE_NAME = 'tk_auth';
+const TK_COOKIE_DOMAIN = '.tradekintra.com';
+const TK_COOKIE_MAX_AGE_SECONDS = 4 * 60 * 60; // 4 hours
+
+const isProductionHost = (): boolean => {
+    return typeof window !== 'undefined' && /tradekintra\.com$/.test(window.location.hostname);
+};
+
+const writeAuthCookie = (access_token: string, refresh_token?: string, expires_at?: number | null): void => {
+    if (!isProductionHost()) return; // Don't try to set parent-domain cookie on localhost
+    try {
+        const payload = JSON.stringify({ access_token, refresh_token, expires_at });
+        const encoded = encodeURIComponent(payload);
+        document.cookie = `${TK_COOKIE_NAME}=${encoded}; domain=${TK_COOKIE_DOMAIN}; path=/; max-age=${TK_COOKIE_MAX_AGE_SECONDS}; secure; samesite=lax`;
+    } catch {
+        // Cookie write failed — non-fatal, sessionStorage still works
+    }
+};
+
+const readAuthCookie = (): { access_token: string; refresh_token?: string; expires_at?: number | null } | null => {
+    if (typeof document === 'undefined') return null;
+    try {
+        const match = document.cookie.split(';').find(c => c.trim().startsWith(`${TK_COOKIE_NAME}=`));
+        if (!match) return null;
+        const value = decodeURIComponent(match.split('=').slice(1).join('='));
+        const info = JSON.parse(value);
+        if (info.expires_at && Date.now() >= info.expires_at) {
+            clearAuthCookie();
+            return null;
+        }
+        return info;
+    } catch {
+        return null;
+    }
+};
+
+const clearAuthCookie = (): void => {
+    if (!isProductionHost()) return;
+    try {
+        document.cookie = `${TK_COOKIE_NAME}=; domain=${TK_COOKIE_DOMAIN}; path=/; max-age=0; secure; samesite=lax`;
+    } catch {
+        // Non-fatal
+    }
+};
+// ---------------------------------------------------------------------------
 // Token storage
-// Access and refresh tokens go in sessionStorage — cleared on tab close.
+// Access and refresh tokens go in sessionStorage (tab-scoped, cleared on close)
+// AND a 4-hour cookie on .tradekintra.com (shared across subdomains for SSO).
 // active_loginid stays in localStorage for multi-tab account awareness.
 // ---------------------------------------------------------------------------
 const AUTH_INFO_KEY = 'auth_info';
 export const storeTokens = (access_token: string, refresh_token?: string, expires_in?: number): void => {
+    const expires_at = expires_in ? Date.now() + expires_in * 1000 : null;
     sessionStorage.setItem(
         AUTH_INFO_KEY,
         JSON.stringify({
             access_token,
             refresh_token,
-            expires_at: expires_in ? Date.now() + expires_in * 1000 : null,
+            expires_at,
         })
     );
+    // [AI] Also write to parent-domain cookie for SSO with bot.tradekintra.com
+    writeAuthCookie(access_token, refresh_token, expires_at);
 };
 export const getStoredToken = (): string | null => {
     try {
+        // First check sessionStorage (fastest, current-tab session)
         const info = JSON.parse(sessionStorage.getItem(AUTH_INFO_KEY) ?? 'null');
-        if (!info) return null;
-        if (info.expires_at && Date.now() >= info.expires_at) {
-            clearTokens();
-            return null;
+        if (info) {
+            if (info.expires_at && Date.now() >= info.expires_at) {
+                clearTokens();
+                return null;
+            }
+            return info.access_token ?? null;
         }
-        return info.access_token ?? null;
+        // [AI] Fallback: check parent-domain cookie. If found, hydrate
+        // sessionStorage so subsequent calls are fast. This is how the bot
+        // inherits the trader's session (and vice versa).
+        const cookieInfo = readAuthCookie();
+        if (cookieInfo?.access_token) {
+            sessionStorage.setItem(AUTH_INFO_KEY, JSON.stringify(cookieInfo));
+            return cookieInfo.access_token;
+        }
+        return null;
     } catch {
         return null;
     }
 };
 export const clearTokens = (): void => {
     sessionStorage.removeItem(AUTH_INFO_KEY);
+    // [AI] Also clear shared SSO cookie — logging out of one app logs out of all
+    clearAuthCookie();
 };
 // ---------------------------------------------------------------------------
 // Token refresh (server-side via /api/oauth-token.php)

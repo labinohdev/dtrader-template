@@ -6,7 +6,7 @@ import { useDerivativesAccount, useMobileBridge } from '@deriv/api';
 import { Button, Skeleton, Text } from '@deriv/components';
 import AccountSwitcher from '@deriv/core/src/App/Components/Layout/Header/account-switcher';
 import { LegacyChevronDown1pxIcon } from '@deriv/quill-icons';
-import { addComma, getDepositUrl, getCurrencyDisplayCode, getSignupUrl, redirectToLogin } from '@deriv/shared';
+import { addComma, getCurrencyDisplayCode, redirectToLogin, redirectToSignUp } from '@deriv/shared';
 import { useStore } from '@deriv/stores';
 import { Localize, useTranslations } from '@deriv-com/translations';
 import { useDevice } from '@deriv-com/ui';
@@ -86,7 +86,7 @@ const AccountHeader = observer(
 
         const accountTypeHeader = is_virtual ? localize('Demo account') : localize('Real account');
 
-        // Determine account types available — only evaluate once data has loaded.
+        // Determine account types available - only evaluate once data has loaded.
         // While loading, accounts is [] which would incorrectly default to "Deposit".
         const hasOnlyDemoAccounts =
             !isLoading && accounts.length > 0 && accounts.every(acc => acc.account_type === 'demo');
@@ -101,9 +101,16 @@ const AccountHeader = observer(
                 // Show modal instead of redirecting directly
                 ui.toggleTryRealModal(true);
             } else {
-                // Transfer button (for both account types or real-only accounts)
+                // [AI] Deposit opens Deriv's cashier in a new tab (Tradekintra has no
+                // built-in cashier yet). Per Amy at Deriv: cashier has no return_url,
+                // so we open in a new tab and let the user close it when done.
                 sendBridgeEvent('trading:transfer', () => {
-                    window.location.href = getDepositUrl();
+                    const lang_param = common.current_language ? `&lang=${common.current_language}` : '';
+                    window.open(
+                        `https://cashier.deriv.com/?source=tradekintra&curr=${currency}${lang_param}`,
+                        '_blank',
+                        'noopener,noreferrer'
+                    );
                 });
             }
         };
@@ -177,24 +184,21 @@ const AccountHeader = observer(
             const handleLoginClick = async () => {
                 await redirectToLogin(common.current_language);
             };
-            const signup_url = getSignupUrl();
 
             return (
                 <div className='account-header'>
                     <div className='account-header__logged-out'>
-                        {signup_url && (
-                            <Button
-                                className='account-header__signup'
-                                onClick={() => window.open(signup_url, '_blank', 'noopener,noreferrer')}
-                                aria-label={localize('Sign up')}
-                                type='button'
-                                secondary
-                            >
-                                <Text size='xs' weight='bold'>
-                                    <Localize i18n_default_text='Sign up' />
-                                </Text>
-                            </Button>
-                        )}
+                        <Button
+                            className='account-header__signup'
+                            onClick={() => redirectToSignUp()}
+                            aria-label={localize('Sign up')}
+                            type='button'
+                            secondary
+                        >
+                            <Text size='xs' weight='bold'>
+                                <Localize i18n_default_text='Sign up' />
+                            </Text>
+                        </Button>
                         <Button
                             className='account-header__login'
                             onClick={handleLoginClick}

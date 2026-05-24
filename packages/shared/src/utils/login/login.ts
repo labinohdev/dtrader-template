@@ -1,9 +1,7 @@
-import { getAuthBaseUrl, getOAuthAppId, getOAuthClientId, getOAuthRedirectUri, getSignupUrl } from '../brand';
-
+import { getAuthBaseUrl, getOAuthAppId, getOAuthClientId, getOAuthRedirectUri } from '../brand';
 // ---------------------------------------------------------------------------
 // PKCE helpers (duplicated here to avoid circular dependency with core)
 // ---------------------------------------------------------------------------
-
 const generateCodeVerifier = (): string => {
     const array = new Uint8Array(32);
     crypto.getRandomValues(array);
@@ -12,7 +10,6 @@ const generateCodeVerifier = (): string => {
         .replace(/\//g, '_')
         .replace(/=/g, '');
 };
-
 const generateCodeChallenge = async (verifier: string): Promise<string> => {
     const encoder = new TextEncoder();
     const data = encoder.encode(verifier);
@@ -22,32 +19,22 @@ const generateCodeChallenge = async (verifier: string): Promise<string> => {
         .replace(/\//g, '_')
         .replace(/=/g, '');
 };
-
 const PKCE_VERIFIER_KEY = 'oauth_code_verifier';
 const PKCE_EXPIRY_KEY = 'oauth_code_verifier_timestamp';
-
 const storePKCEVerifier = (verifier: string): void => {
     sessionStorage.setItem(PKCE_VERIFIER_KEY, verifier);
     sessionStorage.setItem(PKCE_EXPIRY_KEY, String(Date.now()));
 };
 
 // ---------------------------------------------------------------------------
-// Public API
+// Shared OAuth URL builder
 // ---------------------------------------------------------------------------
-
-/**
- * Redirects to the OAuth2 authorize endpoint using PKCE.
- * Uses window.location.replace() so the authorize URL does not appear
- * in browser history (prevents back-button returning to a broken state).
- */
-export const redirectToLogin = async (_language?: string): Promise<void> => {
+const buildOAuthURL = async (prompt?: 'registration'): Promise<string> => {
     const verifier = generateCodeVerifier();
     const challenge = await generateCodeChallenge(verifier);
     storePKCEVerifier(verifier);
-
     const csrf_token = btoa(String.fromCharCode(...crypto.getRandomValues(new Uint8Array(16))));
     sessionStorage.setItem('oauth_csrf_token', csrf_token);
-
     const params = new URLSearchParams({
         response_type: 'code',
         client_id: getOAuthClientId(),
@@ -59,12 +46,34 @@ export const redirectToLogin = async (_language?: string): Promise<void> => {
     });
     const oauth_app_id = getOAuthAppId();
     if (oauth_app_id) params.set('app_id', oauth_app_id);
+    // [AI] prompt=registration tells Deriv to show the signup form instead of login.
+    // This preserves Tradekintra app attribution for new users (3% markup earned).
+    if (prompt) params.set('prompt', prompt);
+    return `${getAuthBaseUrl()}/oauth2/auth?${params}`;
+};
 
-    const auth_url = `${getAuthBaseUrl()}/oauth2/auth?${params}`;
+// ---------------------------------------------------------------------------
+// Public API
+// ---------------------------------------------------------------------------
+/**
+ * Redirects to the OAuth2 authorize endpoint using PKCE.
+ * Uses window.location.replace() so the authorize URL does not appear
+ * in browser history (prevents back-button returning to a broken state).
+ */
+export const redirectToLogin = async (_language?: string): Promise<void> => {
+    const auth_url = await buildOAuthURL();
     window.location.replace(auth_url);
 };
 
-export const redirectToSignUp = (_language?: string): void => {
-    const signup_url = getSignupUrl();
-    if (signup_url) window.open(signup_url, '_blank', 'noopener,noreferrer');
+/**
+ * [AI] Redirects to OAuth2 authorize with prompt=registration so Deriv shows
+ * the signup form. This routes new users through Tradekintra's OAuth flow,
+ * preserving app attribution and earning 3% markup on their trades.
+ *
+ * (Previously this opened home.deriv.com/dashboard/signup in a new tab — that
+ * bypassed our OAuth flow and lost attribution.)
+ */
+export const redirectToSignUp = async (_language?: string): Promise<void> => {
+    const auth_url = await buildOAuthURL('registration');
+    window.location.replace(auth_url);
 };
