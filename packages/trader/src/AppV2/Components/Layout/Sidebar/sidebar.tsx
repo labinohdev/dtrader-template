@@ -12,6 +12,7 @@ import {
     StandaloneClockThreeFillIcon,
     StandaloneClockThreeRegularIcon,
     StandaloneFileRegularIcon,
+    StandaloneGearRegularIcon,
     StandaloneGlobeFillIcon,
     StandaloneGlobeRegularIcon,
     StandaloneMoonRegularIcon,
@@ -103,6 +104,13 @@ const Sidebar = observer(() => {
         });
     };
 
+    // [AI] Trading Bots — same-tab navigation to bot.tradekintra.com.
+    // SSO via the .tradekintra.com cookie means user lands there already logged in.
+    const handleTradingBotsClick = () => {
+        closeSidebarFlyout();
+        window.location.href = 'https://bot.tradekintra.com';
+    };
+
     const closeFlyout = () => {
         closeSidebarFlyout();
     };
@@ -140,6 +148,15 @@ const Sidebar = observer(() => {
             onClick: handleReportsClick,
             isActive: isReportsActive,
             dataTestId: 'dt_sidebar_reports',
+        },
+        // [AI] Trading Bots — links to bot.tradekintra.com (white-label DBot).
+        {
+            id: 'trading_bots',
+            icon: <StandaloneGearRegularIcon fill='var(--color-text-primary)' iconSize='sm' />,
+            label: localize('Trading Bots'),
+            onClick: handleTradingBotsClick,
+            isActive: false,
+            dataTestId: 'dt_sidebar_trading_bots',
         },
     ];
 
