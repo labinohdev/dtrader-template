@@ -113,6 +113,10 @@ export default class ClientStore extends BaseStore {
             resetVirtualBalance: action.bound,
             is_crypto: action.bound,
             switchAccount: action.bound,
+            // [AI] Registered so MobX treats it as an action — invoked from
+            // NetworkMonitorBase.reconnectAfter() to refresh the OTP-embedded
+            // WebSocket URL before each reconnect attempt.
+            refreshSocketAuth: action.bound,
         });
 
         reaction(
@@ -566,6 +570,41 @@ export default class ClientStore extends BaseStore {
             url.searchParams.delete('token');
             window.history.replaceState({}, document.title, url.toString());
         }
+    }
+
+    /**
+     * [AI] Refresh the WebSocket authentication for the CURRENT account.
+     *
+     * Called by NetworkMonitorBase.reconnectAfter() when the socket has been
+     * closed (idle timeout, network drop, mobile background, etc.) and needs
+     * to be reopened.
+     *
+     * The original reconnect logic blindly reused the cached OTP WS URL, but
+     * OTPs are single-use — the server rejects them on the second connection
+     * attempt, producing the "Connection failed. Please refresh this page to
+     * continue." error users hit after going idle or backgrounding the app.
+     *
+     * Fix: fetch a fresh OTP, update the socket URL, then reconnect. For
+     * logged-out sessions, reconnect cleanly to the public endpoint.
+     *
+     * @throws if logged in but fetchOTP fails — the caller (NetworkMonitorBase)
+     *         tracks retry counts and falls back to public after MAX_AUTH_RETRIES.
+     */
+    async refreshSocketAuth() {
+        const has_token = !!getStoredToken();
+        if (!has_token || !this.loginid) {
+            // Logged out — reconnect to public endpoint cleanly
+            BinarySocket.setWSUrl(null);
+            BinarySocket.openNewConnection();
+            return;
+        }
+
+        // Logged in — fetch a fresh OTP for the current account.
+        // OTP URLs are single-use and embed the account ID, so we must mint a
+        // new one each reconnect.
+        const ws_url = await fetchOTP(this.loginid);
+        BinarySocket.setWSUrl(ws_url);
+        BinarySocket.closeAndOpenNewConnection();
     }
 
     /**

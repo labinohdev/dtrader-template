@@ -10,6 +10,7 @@ import {
     StandaloneClockThreeRegularIcon,
     StandaloneFileChartColumnRegularIcon,
     StandaloneFileLinesRegularIcon,
+    StandaloneGearRegularIcon,
     StandaloneGlobeRegularIcon,
     StandaloneLifeRingRegularIcon,
     StandaloneMoonRegularIcon,
@@ -50,6 +51,12 @@ const MenuPage = observer(() => {
 
     const handleHelpCentreClick = React.useCallback(() => {
         window.open(getHelpCentreUrl(), '_blank', 'noopener,noreferrer');
+    }, []);
+
+    // [AI] Navigate to the Tradekintra bot site. Same-tab so the .tradekintra.com
+    // SSO cookie carries over cleanly. Works for both logged-in and logged-out users.
+    const handleTradingBotsClick = React.useCallback(() => {
+        window.location.href = 'https://bot.tradekintra.com';
     }, []);
 
     if (!isMobile) return <Redirect to={routes.index} />;
@@ -94,6 +101,23 @@ const MenuPage = observer(() => {
                             </div>
                         </div>
                     )}
+                    {/* [/AI] */}
+
+                    {/* [AI] Bots Section — links to bot.tradekintra.com (SSO via shared cookie) */}
+                    <div className='header__menu-section'>
+                        <div className='header__menu-section-header'>
+                            <Text className='header__menu-section-title' size='xsm' weight='bold'>
+                                {localize('Bots')}
+                            </Text>
+                        </div>
+                        <div className='menu-page__item' onClick={handleTradingBotsClick}>
+                            <MenuLink
+                                icon={<StandaloneGearRegularIcon iconSize='sm' />}
+                                text={localize('Trading Bots')}
+                                suffix_icon={<StandaloneChevronRightRegularIcon iconSize='sm' />}
+                            />
+                        </div>
+                    </div>
                     {/* [/AI] */}
 
                     {/* Settings Section */}
