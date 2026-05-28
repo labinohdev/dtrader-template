@@ -25,6 +25,7 @@ import { useDevice } from '@deriv-com/ui';
 
 import { MobileLanguageMenu } from 'App/Components/Layout/Header/Components/ToggleMenu';
 import MenuLink from 'App/Components/Layout/Header/menu-link';
+import { getStoredToken } from 'Services/oauth';
 
 const MenuPage = observer(() => {
     const history = useHistory();
@@ -53,10 +54,16 @@ const MenuPage = observer(() => {
         window.open(getHelpCentreUrl(), '_blank', 'noopener,noreferrer');
     }, []);
 
-    // [AI] Navigate to the Tradekintra bot site. Same-tab so the .tradekintra.com
-    // SSO cookie carries over cleanly. Works for both logged-in and logged-out users.
+    // [AI] Navigate to the Tradekintra bot site. Pass the access token in the URL
+    // (?tk_token=) so the bot inherits the session reliably across subdomains —
+    // mobile browsers block the shared cookie, but URL params always carry over.
+    // The bot reads tk_token on load, stores it, then strips it from the URL.
+    // The shared .tradekintra.com cookie remains as a desktop fallback.
     const handleTradingBotsClick = React.useCallback(() => {
-        window.location.href = 'https://bot.tradekintra.com';
+        const token = getStoredToken();
+        window.location.href = token
+            ? `https://bot.tradekintra.com/?tk_token=${encodeURIComponent(token)}`
+            : 'https://bot.tradekintra.com';
     }, []);
 
     if (!isMobile) return <Redirect to={routes.index} />;

@@ -104,11 +104,22 @@ const Sidebar = observer(() => {
         });
     };
 
-    // [AI] Trading Bots — same-tab navigation to bot.tradekintra.com.
-    // SSO via the .tradekintra.com cookie means user lands there already logged in.
+    // [AI] Trading Bots — navigate to bot.tradekintra.com, passing the access
+    // token in the URL (?tk_token=) so the bot inherits the session reliably.
+    // Mobile browsers block the shared cookie; URL params always carry over.
+    // The bot reads tk_token on load, stores it, then strips it from the URL.
     const handleTradingBotsClick = () => {
         closeSidebarFlyout();
-        window.location.href = 'https://bot.tradekintra.com';
+        let token = '';
+        try {
+            const info = JSON.parse(sessionStorage.getItem('auth_info') ?? 'null');
+            token = info?.access_token ?? '';
+        } catch {
+            token = '';
+        }
+        window.location.href = token
+            ? `https://bot.tradekintra.com/?tk_token=${encodeURIComponent(token)}`
+            : 'https://bot.tradekintra.com';
     };
 
     const closeFlyout = () => {

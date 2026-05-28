@@ -99,7 +99,10 @@ export const exchangeCodeForToken = async (
 // [AI] Parent-domain cookie for cross-subdomain SSO
 // Both tradekintra.com and bot.tradekintra.com read/write this cookie so they
 // share auth state. Cookie is JS-readable (same XSS profile as sessionStorage)
-// but scoped to .tradekintra.com so all subdomains can access it.
+// but scoped to tradekintra.com so all subdomains can access it. We use the
+// bare domain (no leading dot) because mobile Chrome can silently treat a
+// leading-dot domain as host-only, breaking SSO on subdomains. Per RFC 6265
+// the leading dot is meaningless; bare domain implicitly covers subdomains.
 // Short 4-hour lifetime matches Deriv token expiry pattern.
 // ---------------------------------------------------------------------------
 const TK_COOKIE_NAME = 'tk_auth';
@@ -149,7 +152,7 @@ const clearAuthCookie = (): void => {
 // ---------------------------------------------------------------------------
 // Token storage
 // Access and refresh tokens go in sessionStorage (tab-scoped, cleared on close)
-// AND a 4-hour cookie on .tradekintra.com (shared across subdomains for SSO).
+// AND a 4-hour cookie on tradekintra.com (shared across subdomains for SSO).
 // active_loginid stays in localStorage for multi-tab account awareness.
 // ---------------------------------------------------------------------------
 const AUTH_INFO_KEY = 'auth_info';

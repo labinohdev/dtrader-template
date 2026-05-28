@@ -312,6 +312,34 @@ export default class ClientStore extends BaseStore {
     };
 
     async init(external_id) {
+        // [AI] Cross-subdomain SSO via URL token. The bot appends
+        // ?tk_token=<access_token> when linking back to the trader. Mobile
+        // browsers block the shared cookie, but URL params always carry over.
+        // Read it, store it in sessionStorage as auth_info, then strip it from
+        // the URL. Done before removeTokenFromUrl / getStoredToken so the rest
+        // of init() sees the session as authenticated.
+        try {
+            const url = new URL(window.location.href);
+            const tk_token = url.searchParams.get('tk_token');
+            if (tk_token) {
+                const existing = sessionStorage.getItem('auth_info');
+                if (!existing) {
+                    sessionStorage.setItem(
+                        'auth_info',
+                        JSON.stringify({
+                            access_token: tk_token,
+                            refresh_token: undefined,
+                            expires_at: null,
+                        })
+                    );
+                }
+                url.searchParams.delete('tk_token');
+                window.history.replaceState({}, document.title, url.toString());
+            }
+        } catch (e) {
+            // URL parse failed — non-fatal, fall through to cookie/session
+        }
+
         // Remove any legacy token parameters from URL
         this.removeTokenFromUrl();
 
